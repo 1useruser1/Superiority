@@ -1,6 +1,6 @@
 --[[
 
-	fieldboot by user © CC0 1.0 Universal (2026)
+	Superiority by user © CC0 1.0 Universal (2026)
 
 	https://discord.gg/gSf5q4d8ga
 
@@ -40,7 +40,7 @@ Library.UnloadCallback = function()
 end
 
 local MainFrame = Library:CreateWindow({
-	Name = "Field Boot",
+	Name = "Superiority",
 	Themeable = {
 		Image = "7059346386",
 		Info = "Made by Exunys\nPowered by Pepsi's UI Library",
@@ -900,7 +900,7 @@ FunctionsSection:AddButton({
 })
 
 FunctionsSection:AddButton({
-	Name = "Field boot discord",
+	Name = "Superiority discord",
 	Callback = function()
 		setclipboard("https://discord.gg/gSf5q4d8ga")
 	end
