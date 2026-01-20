@@ -1,0 +1,271 @@
+--[[ SUPERIORITY – CUSTOM RAGE GUI LOADER (STABLE FINAL) ]]
+
+--// Services
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Player = Players.LocalPlayer
+
+--// Remove old GUI
+pcall(function()
+	Player.PlayerGui:FindFirstChild("SuperiorityRage"):Destroy()
+end)
+
+--// Environment
+if getgenv().AirHub then return end
+getgenv().AirHub = {}
+
+--// Safe loader
+local function safeLoad(url)
+	local ok, res = pcall(game.HttpGet, game, url)
+	if ok and res then
+		local f = loadstring(res)
+		if f then f() end
+	end
+end
+
+--// Load modules
+safeLoad("https://raw.githubusercontent.com/1useruser1/robloxwh/refs/heads/main/aimbot")
+safeLoad("https://raw.githubusercontent.com/1useruser1/robloxwh/refs/heads/main/wallh")
+
+repeat task.wait() until getgenv().AirHub.Aimbot and getgenv().AirHub.WallHack
+
+local Aimbot = getgenv().AirHub.Aimbot
+local WallHack = getgenv().AirHub.WallHack
+
+--// GUI
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "SuperiorityRage"
+Gui.ResetOnSpawn = false
+Gui.Parent = Player:WaitForChild("PlayerGui")
+
+--// Main Frame
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.fromOffset(420,460)
+Main.Position = UDim2.fromScale(0.3,0.2)
+Main.BackgroundColor3 = Color3.fromRGB(18,18,18)
+Main.BorderSizePixel = 2
+Main.Active = true
+Main.Draggable = true
+
+--// FAST RAINBOW
+local Gradient = Instance.new("UIGradient", Main)
+local hue = 0
+RunService.RenderStepped:Connect(function(dt)
+	hue = (hue + dt * 0.6) % 1
+	Gradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromHSV(hue,1,1)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromHSV((hue+0.33)%1,1,1)),
+		ColorSequenceKeypoint.new(1, Color3.fromHSV((hue+0.66)%1,1,1))
+	}
+end)
+
+--// Title
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1,0,0,35)
+Title.BackgroundTransparency = 1
+Title.Text = "SUPERIORITY"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.TextColor3 = Color3.new(1,1,1)
+
+--// Tabs
+local Tabs = Instance.new("Frame", Main)
+Tabs.Position = UDim2.new(0,0,0,35)
+Tabs.Size = UDim2.new(0,110,1,-35)
+Tabs.BackgroundColor3 = Color3.fromRGB(14,14,14)
+
+local TabList = Instance.new("UIListLayout", Tabs)
+TabList.Padding = UDim.new(0,6)
+
+--// Pages
+local Pages = Instance.new("Frame", Main)
+Pages.Position = UDim2.new(0,110,0,35)
+Pages.Size = UDim2.new(1,-110,1,-35)
+Pages.BackgroundTransparency = 1
+
+local PagesFolder = {}
+
+local function NewPage(name)
+	local f = Instance.new("Frame", Pages)
+	f.Size = UDim2.new(1,0,1,0)
+	f.Visible = false
+	local l = Instance.new("UIListLayout", f)
+	l.Padding = UDim.new(0,6)
+	PagesFolder[name] = f
+	return f
+end
+
+local function SwitchPage(name)
+	for _,v in pairs(PagesFolder) do v.Visible = false end
+	if PagesFolder[name] then PagesFolder[name].Visible = true end
+end
+
+local function NewTab(name)
+	local b = Instance.new("TextButton", Tabs)
+	b.Size = UDim2.new(1,-10,0,30)
+	b.Text = name
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	b.MouseButton1Click:Connect(function()
+		SwitchPage(name)
+	end)
+end
+
+local function Toggle(parent,text,default,callback)
+	local b = Instance.new("TextButton", parent)
+	b.Size = UDim2.new(1,-15,0,25)
+	local state = default
+	b.Text = text..": "..(state and "ON" or "OFF")
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 12
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	b.MouseButton1Click:Connect(function()
+		state = not state
+		b.Text = text..": "..(state and "ON" or "OFF")
+		callback(state)
+	end)
+end
+
+local function SensControl(parent,text,default,callback)
+	local f = Instance.new("Frame", parent)
+	f.Size = UDim2.new(1,-15,0,30)
+	f.BackgroundTransparency = 1
+	local val = default
+
+	local lbl = Instance.new("TextLabel", f)
+	lbl.Size = UDim2.new(0.6,0,1,0)
+	lbl.BackgroundTransparency = 1
+	lbl.TextColor3 = Color3.new(1,1,1)
+	lbl.Font = Enum.Font.Gotham
+	lbl.TextSize = 12
+
+	local function update()
+		lbl.Text = text..": "..string.format("%.2f",val)
+		callback(val)
+	end
+
+	local minus = Instance.new("TextButton", f)
+	minus.Size = UDim2.new(0.2,0,1,0)
+	minus.Position = UDim2.new(0.6,0,0,0)
+	minus.Text = "-"
+	minus.Font = Enum.Font.GothamBold
+	minus.TextSize = 14
+
+	local plus = minus:Clone()
+	plus.Text = "+"
+	plus.Position = UDim2.new(0.8,0,0,0)
+	plus.Parent = f
+
+	minus.MouseButton1Click:Connect(function()
+		val = math.max(0.1,val-0.1)
+		update()
+	end)
+
+	plus.MouseButton1Click:Connect(function()
+		val += 0.1
+		update()
+	end)
+
+	update()
+end
+
+--// Pages
+local AimbotPage = NewPage("AIMBOT")
+local VisualsPage = NewPage("VISUALS")
+local CrosshairPage = NewPage("CROSSHAIR")
+local UtilsPage = NewPage("UTILITIES")
+
+NewTab("AIMBOT")
+NewTab("VISUALS")
+NewTab("CROSSHAIR")
+NewTab("UTILITIES")
+SwitchPage("AIMBOT")
+
+--// ================= AIMBOT =================
+Toggle(AimbotPage,"Enabled",Aimbot.Settings.Enabled,function(v)
+	Aimbot.Settings.Enabled = v
+end)
+
+Toggle(AimbotPage,"Wall Check",Aimbot.Settings.WallCheck,function(v)
+	Aimbot.Settings.WallCheck = v
+end)
+
+Toggle(AimbotPage,"Alive Check",Aimbot.Settings.AliveCheck,function(v)
+	Aimbot.Settings.AliveCheck = v
+end)
+
+Toggle(AimbotPage,"3rd Person Aimbot",false,function(v)
+	pcall(function() Aimbot.Settings.ThirdPerson = v end)
+end)
+
+SensControl(AimbotPage,"3rd Person Sens",1,function(v)
+	pcall(function() Aimbot.Settings.ThirdPersonSensitivity = v end)
+end)
+
+--// ================= VISUALS =================
+Toggle(VisualsPage,"WallHack Enabled",WallHack.Settings.Enabled,function(v)
+	WallHack.Settings.Enabled = v
+end)
+
+Toggle(VisualsPage,"ESP Enabled",WallHack.Visuals.ESPSettings.Enabled,function(v)
+	WallHack.Visuals.ESPSettings.Enabled = v
+end)
+
+Toggle(VisualsPage,"ESP Team Check",false,function(v)
+	pcall(function()
+		if WallHack.Visuals.ESPSettings.TeamCheck ~= nil then
+			WallHack.Visuals.ESPSettings.TeamCheck = v
+		elseif WallHack.Settings.TeamCheck ~= nil then
+			WallHack.Settings.TeamCheck = v
+		end
+	end)
+end)
+
+Toggle(VisualsPage,"Boxes",WallHack.Visuals.BoxSettings.Enabled,function(v)
+	WallHack.Visuals.BoxSettings.Enabled = v
+end)
+
+Toggle(VisualsPage,"Tracers",WallHack.Visuals.TracersSettings.Enabled,function(v)
+	WallHack.Visuals.TracersSettings.Enabled = v
+end)
+
+Toggle(VisualsPage,"Health Bars",WallHack.Visuals.HealthBarSettings.Enabled,function(v)
+	WallHack.Visuals.HealthBarSettings.Enabled = v
+end)
+
+--// ================= CROSSHAIR =================
+Toggle(CrosshairPage,"Enabled",WallHack.Crosshair.Settings.Enabled,function(v)
+	WallHack.Crosshair.Settings.Enabled = v
+end)
+
+Toggle(CrosshairPage,"Center Dot",WallHack.Crosshair.Settings.CenterDot,function(v)
+	WallHack.Crosshair.Settings.CenterDot = v
+end)
+
+--// ================= UTILITIES =================
+local function Button(parent,text,callback)
+	local b = Instance.new("TextButton", parent)
+	b.Size = UDim2.new(1,-15,0,30)
+	b.Text = text
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(45,45,45)
+	b.MouseButton1Click:Connect(callback)
+end
+
+Button(UtilsPage,"Load Infinite Yield",function()
+	safeLoad("https://raw.githubusercontent.com/kruzif1x-rgb/roblox/refs/heads/main/iy")
+end)
+
+--// Menu toggle + mouse control
+UIS.InputBegan:Connect(function(i,g)
+	if not g and i.KeyCode == Enum.KeyCode.RightShift then
+		Gui.Enabled = not Gui.Enabled
+		UIS.MouseBehavior = Gui.Enabled and Enum.MouseBehavior.Default or Enum.MouseBehavior.LockCenter
+	end
+end)
